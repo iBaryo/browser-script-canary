@@ -1,0 +1,1 @@
+export {Canary, ICanaryConfig} from './app/Canary';

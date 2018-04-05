@@ -1,0 +1,30 @@
+{
+  "name": "browser-script-canary",
+  "version": "1.0.0",
+  "description": "canary deployment for your script",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc index.ts --target es2016 --module commonjs --sourcemap --declaration",
+    "prepublish": "npm run build",
+    "start": "ts-node example.ts",
+    "test": "npm run build && jasmine-ts \"specs/*spec.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "asd"
+  },
+  "keywords": [
+    "canary",
+    "script",
+    "browser"
+  ],
+  "author": "Or Bar Yosef",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jasmine": "^2.6.0",
+    "@types/node": "^9.6.2",
+    "jasmine-co": "^1.2.2",
+    "jasmine-ts": "^0.2.1",
+    "typescript": "^2.5.3"
+  }
+}
