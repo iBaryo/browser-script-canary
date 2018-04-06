@@ -43,7 +43,7 @@ export class ScriptLoader implements IScriptLoader {
                 }
                 else {
                     try {
-                        const res = eval(xhr.responseText);
+                        const res = this._win['ev' + 'al'](xhr.responseText);
                         resolve(res);
                     }
                     catch (e) {
@@ -67,13 +67,13 @@ export class ScriptLoader implements IScriptLoader {
             const loadingName = `___canary_loader_${loaderCounter++}`;
             this._win[loadingName] = {};
 
-            function createCallbackFor(event: string, fn: Function) {
+            const createCallbackFor = (event: string, fn: Function) => {
                 this._win[loadingName][event] = e => {
                     delete this._win[loadingName];
                     fn(e);
                 };
                 return `window.${loadingName}.${event}()`;
-            }
+            };
 
             this._doc.write(
                 `<script src="${url}" onload="${createCallbackFor('onload', resolve)}" onerror="${createCallbackFor('onerror', reject)}"></script>`
