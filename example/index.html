@@ -49,7 +49,7 @@
     <script>
         const el = document.getElementById('isCanaryScript');
         const act = () => el.innerText = String(!!sdk.isCanary);
-        sdk ? act() : window.onSdkReady = act;
+        window.sdk ? act() : window.onSdkReady = act;
     </script>
 </div>
 <section id="canary-ctrl">
