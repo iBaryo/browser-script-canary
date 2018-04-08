@@ -4,5 +4,5 @@ spec/**/*
 **/*.ts
 !**/*.d.ts
 **/*.js.map
-example.*
+example/
 tsconfig.json

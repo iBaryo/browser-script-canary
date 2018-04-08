@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc index.ts --target es2016 --module commonjs --sourcemap --declaration",
     "prepublish": "npm run build",
-    "start": "ts-node example.ts",
+    "example": "browserify example/mySdk.ts -p [ tsify --project ./tsconfig.json ] -d -o example/mySdk.js && http-server",
     "test": "npm run build && jasmine-ts \"specs/*spec.ts\""
   },
   "repository": {
@@ -16,16 +16,20 @@
   "keywords": [
     "canary",
     "script",
-    "browser"
+    "browser",
+    "sdk"
   ],
   "author": "Or Bar Yosef",
   "license": "MIT",
   "devDependencies": {
     "@types/jasmine": "^2.6.0",
     "@types/node": "^9.6.2",
+    "browserify": "^16.1.1",
     "dom-parser": "^0.1.5",
+    "http-server": "^0.11.1",
     "jasmine-co": "^1.2.2",
     "jasmine-ts": "^0.2.1",
+    "tsify": "^3.0.4",
     "typescript": "^2.5.3"
   }
 }
