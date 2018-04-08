@@ -72,6 +72,24 @@ describe('canary', () => {
 
             expect(mockCookieProvider.put).toHaveBeenCalledWith(mockConfig.cookiesNames.isCanary, false.toString());
         });
+
+        it('should set canary version if exists in config', async () => {
+            // act
+            await canary.bootstrap();
+
+            expect(mockCookieProvider.put).toHaveBeenCalledTimes(2);
+            expect((mockCookieProvider.put as Spy).calls.mostRecent().args).toEqual([mockConfig.cookiesNames.version, mockConfig.version]);
+        });
+
+        it('should not set canary version if does not exist in config', async () => {
+            delete mockConfig.version;
+
+            // act
+            await canary.bootstrap();
+
+            expect(mockCookieProvider.put).toHaveBeenCalledTimes(1);
+        });
+
         describe('rolled canary to true', () => {
             beforeEach(async () => {
                 mockConfig.canaryScriptUrl = mockScriptUrl;
@@ -176,7 +194,7 @@ describe('canary', () => {
                     const res = await canary.bootstrap();
                     fail();
                 }
-                catch(e) {
+                catch (e) {
                     expect(e).toBeNull();
                 }
             });

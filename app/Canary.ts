@@ -65,7 +65,7 @@ export class Canary {
     private rollCanary() {
         const isCanary = this._randomFactory() <= this._config.probability;
         this._cookieProvider.put(this._config.cookiesNames.isCanary, isCanary.toString());
-        this._cookieProvider.put(this._config.cookiesNames.version, this._config.version);
+        this._config.version && this._cookieProvider.put(this._config.cookiesNames.version, this._config.version);
         return isCanary;
     }
 
