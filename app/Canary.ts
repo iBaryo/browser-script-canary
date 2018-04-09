@@ -10,10 +10,12 @@ export interface ICanaryConfig {
     cookiesNames?: {
         isCanary?: string,
         version?: string
-    }
+    },
+    globalCanaryIndicationName?: string
 }
 
 export class Canary {
+
     constructor(private _config: ICanaryConfig,
                 private _cookieProvider = new CookieProvider(),
                 private _scriptLoader : IScriptLoader = new ScriptLoader(),
@@ -21,7 +23,11 @@ export class Canary {
                 private _defaultScriptFactory = () =>
                     (!document || !document.currentScript)
                         ? undefined
-                        : (document.currentScript as HTMLScriptElement).src) {
+                        : (document.currentScript as HTMLScriptElement).src,
+                private _globalCanaryIndication = {
+                    get: () => window[_config.globalCanaryIndicationName],
+                    set: (val) => window[_config.globalCanaryIndicationName] = val
+                }) {
 
         this._config.cookiesNames = this._config.cookiesNames || {};
         this._config.cookiesNames.isCanary = this._config.cookiesNames.isCanary || 'isCanary';
@@ -29,26 +35,42 @@ export class Canary {
         if (this._config.version && !this._config.cookiesNames.version) {
             this._config.cookiesNames.version = 'canaryVer';
         }
+
+        this._config.globalCanaryIndicationName = this._config.globalCanaryIndicationName || '___canary';
     }
 
 
-    public async bootstrap() {
+    public bootstrap() : Promise<boolean|any> {
         if (!this._config.probability) {
             this._cookieProvider.remove(this._config.cookiesNames.isCanary);
             this._cookieProvider.remove(this._config.cookiesNames.version);
+            return Promise.resolve(false);
         }
         else if (this.shouldLoadCanary()) {
-            return await this._scriptLoader.load(
-                this.getCanaryScriptUrl(),
-                !!this._config.loadAsync,
-                !!this._config.supportCORs
-            ).then(res => res === undefined ? true : res);
+            return this.loadCanaryScript().then(res => res === undefined ? true : res);
         }
-
-        return false;
+        else {
+            return Promise.resolve(false);
+        }
     }
 
-    private shouldLoadCanary() {
+    public isCanaryAlreadyActive() {
+        return this._globalCanaryIndication.get();
+    }
+
+    public loadCanaryScript() {
+        this._globalCanaryIndication.set(true);
+        return this._scriptLoader.load(
+            this.getCanaryScriptUrl(),
+            !!this._config.loadAsync,
+            !!this._config.supportCORs
+        ).then(res => {
+            this._globalCanaryIndication.set(false);
+            return res;
+        });
+    }
+
+    public shouldLoadCanary() {
         if (this.wasCanarySet()) {
             return this._cookieProvider.get(this._config.cookiesNames.isCanary) == true.toString();
         }

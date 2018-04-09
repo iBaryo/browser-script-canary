@@ -13,6 +13,7 @@ describe('canary', () => {
     let mockCookieProvider: CookieProvider;
     let randomFactorySpy: Spy & (() => number);
     let defaultScriptFactorySpy: Spy & (() => string);
+    let mockGlobalCanaryIndication;
 
     const mockScriptUrl = 'mock.script.com';
     const mockVersion = 'vMock';
@@ -21,7 +22,8 @@ describe('canary', () => {
         mockConfig = {
             probability: 50,
             version: mockVersion,
-            canaryScriptUrl: mockScriptUrl
+            canaryScriptUrl: mockScriptUrl,
+            globalCanaryIndicationName: '___canary'
         };
         mockScriptLoader = {
             load: jasmine.createSpy('script loader').and.returnValue(Promise.resolve())
@@ -35,12 +37,19 @@ describe('canary', () => {
 
         defaultScriptFactorySpy = jasmine.createSpy('default script').and.returnValue(mockScriptUrl);
 
+        let mockStaging = {} as any;
+        mockGlobalCanaryIndication = {
+            get: jasmine.createSpy('get global canary ind').and.callFake(() => mockStaging[mockConfig.globalCanaryIndicationName]),
+            set: jasmine.createSpy('set global canary ind').and.callFake(v => mockStaging[mockConfig.globalCanaryIndicationName] = v)
+        };
+
         canary = new Canary(
             mockConfig,
             mockCookieProvider,
             mockScriptLoader,
             randomFactorySpy,
-            defaultScriptFactorySpy
+            defaultScriptFactorySpy,
+            mockGlobalCanaryIndication
         );
     });
 
@@ -203,8 +212,23 @@ describe('canary', () => {
                 const res = await canary.bootstrap();
                 expect(res).toBe(mockVersion);
             });
-            // it('should disable canary if script evaluation throws', () => {
-            // });
+
+            describe('isCanaryAlreadyActive', () => {
+                it('should not be before ever bootstrapping canary', () => {
+                    expect(canary.isCanaryAlreadyActive()).toBeFalsy();
+                });
+                it('should be when start bootstrapping', () => {
+                    canary.bootstrap(); // not waiting
+                    expect(canary.isCanaryAlreadyActive()).toBeTruthy();
+                });
+                it('should return to false when done bootstrapping', async () => {
+                    expect(canary.isCanaryAlreadyActive()).toBeFalsy();
+                    const bootstrapping = canary.bootstrap();
+                    expect(canary.isCanaryAlreadyActive()).toBeTruthy();
+                    await bootstrapping;
+                    expect(canary.isCanaryAlreadyActive()).toBeFalsy();
+                });
+            });
         });
     });
 });
