@@ -1,4 +1,4 @@
-#Browser Script Canary
+# Browser Script Canary
 An easy way to do a user based Canary Deployment of your Javascript script!
 
 Really useful for SDK deployments.
@@ -90,8 +90,8 @@ export class Canary {
                         ? undefined
                         : (document.currentScript as HTMLScriptElement).src,
                 globalCanaryIndication = {
-                    get: () => window[_config.globalCanaryIndicationName],
-                    set: (val) => window[_config.globalCanaryIndicationName] = val
+                    get: () => window[config.globalCanaryIndicationName],
+                    set: (val) => window[config.globalCanaryIndicationName] = val
                 }) {}
 }
 ```
