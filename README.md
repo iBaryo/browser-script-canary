@@ -28,6 +28,17 @@ import {ICanaryConfig, Canary} from "browser-script-canary";
 })();
 ```
 
+
+### Inner Flow
+* Script loads.
+* Participating in the Canary:
+    * If the end-user never rolled its participation in the Canary
+        * Roll the canary participation according to the probability.
+    * If the end-user participates in Canary
+        * Loading of Canary Script:
+            * According to configuration
+     
+
 ## ICanaryConfig
 ```typescript
 export interface ICanaryConfig {
@@ -49,26 +60,67 @@ export interface ICanaryConfig {
 }
 ```
 
+
 ### Participating in the Canary
 
 #### `probability : number`
-TODO
+Required in range: `0 <= probability <= 100`.
+
+The higher the probability, the more likely an end-user will receive the Canary version. 
+
 #### `version?: string`
-TODO
+Optional. 
+
+Changing the version will cause reset of all participating Canary end-users.
 #### `cookiesNames?: Object`
-TODO
+`isCanary: string` - the end-user's Canary indication cookie name.
+
+`version: string` - the end-user's Canary version cookie name. If no `version` parameter, it won't be set.
 
 ### Loading of Canary Script
 #### `canaryScriptUrl?: string`
-TODO
+Optional. The default is the URL of the current script (`document.currentScript`) with the query string parameter: `version=canary`.
+The URL the Canary version script will be loaded from. 
+ 
+
 #### `loadAsync?: boolean`
-TODO
+Optional. The Default is `false`. 
+
+If true, will load the Canary script in an async matter by appending a script tag to the `document.head`'s children.
+This could be problematic in the following case:
+
+```html
+<html>
+    <head>
+        <script>
+            const canary = new Canary({
+                probability: 100,
+                canaryScriptUrl: '/mySdk.js?version=canary',
+                loadAsync: true
+            });        
+            canary.bootstrap();
+        </script>
+        <script>
+           mySdk.doAction();
+           // because in `head`, scripts are loaded in a sync matter,
+           //  this will run before the above finished bootstrapping - so it'll throw.
+        </script>
+    </head>
+</html>
+```
+
 #### `supportCORs?: boolean`
-TODO
+Optional. The default is `false`. Relevant only if `loadAsync !== true`.
+
+If `true` the canary script URL will be loaded by a sync XHR request - so it must support CORs.
+Else it'll be loaded via `document.write` of a the relevant script tag (which works fine if the script is in `head`). 
+
 
 ### Helpers
 #### `globalCanaryIndicationName?: string`
-TODO
+Optional. The default is `'___canary'`.
+
+The property name on `window` that the indication for the Canary bootstrapping will be stored.
 
 ## Example
 Inside the repo there's an example that can walk you through the usage and value of most of the above parameters.
@@ -97,12 +149,16 @@ export class Canary {
 ```
 
 #### `CookieProvider`
-TODO
+How cookies are read, set and deleted.
+
 #### `ScriptLoader`
-TODO
+How the Canary script will be loaded according to configuration.
+
 #### `randomFactory`
-TODO
+How to generate a random number.
+
 #### `defaultScriptFactory`
-TODO
+How to get the default script url (when `canaryScriptUrl` is not provided).
+
 #### `globalCanaryIndication`
-TODO
+How to get and set the global indication of loading Canary.
