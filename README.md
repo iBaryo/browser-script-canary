@@ -8,6 +8,7 @@ Really useful for SDK deployments.
 * Seamlessly load the Canary version of your script.
 
 ## Simple example
+In Typescript:
 ```typescript
 import {ICanaryConfig, Canary} from "browser-script-canary";
 
@@ -73,20 +74,27 @@ Optional.
 
 Changing the version will cause reset of all participating Canary end-users.
 #### `cookiesNames?: Object`
+Optional.
+
+
 `isCanary: string` - the end-user's Canary indication cookie name.
 
 `version: string` - the end-user's Canary version cookie name. If no `version` parameter, it won't be set.
 
 ### Loading of Canary Script
 #### `canaryScriptUrl?: string`
-Optional. The default is the URL of the current script (`document.currentScript`) with the query string parameter: `version=canary`.
-The URL the Canary version script will be loaded from. 
+Optional. 
+
+The URL the Canary version script will be loaded from.
+
+The default is the URL of the current script (`document.currentScript`) with the query string parameter: `version=canary`.
+To change this - check the 'Advanced Customization' section. 
  
 
 #### `loadAsync?: boolean`
 Optional. The Default is `false`. 
 
-If true, will load the Canary script in an async matter by appending a script tag to the `document.head`'s children.
+If `true`, will load the Canary script in an async matter by appending a script tag to the `document.head`'s children.
 This could be problematic in the following case:
 
 ```html
@@ -113,6 +121,7 @@ This could be problematic in the following case:
 Optional. The default is `false`. Relevant only if `loadAsync !== true`.
 
 If `true` the canary script URL will be loaded by a sync XHR request - so it must support CORs.
+
 Else it'll be loaded via `document.write` of a the relevant script tag (which works fine if the script is in `head`). 
 
 
@@ -121,6 +130,8 @@ Else it'll be loaded via `document.write` of a the relevant script tag (which wo
 Optional. The default is `'___canary'`.
 
 The property name on `window` that the indication for the Canary bootstrapping will be stored.
+
+More about changing this in the 'Advanced Customization' section.
 
 ## Example
 Inside the repo there's an example that can walk you through the usage and value of most of the above parameters.
@@ -149,16 +160,40 @@ export class Canary {
 ```
 
 #### `CookieProvider`
+```typescript
+export interface ICookieProvider {
+    get: (key: string) => string | null;
+    put: (key: string, val: string) => void;
+    remove: (key: string) => void;
+}
+```
 How cookies are read, set and deleted.
 
 #### `ScriptLoader`
+```typescript
+export interface IScriptLoader {
+    load(url: string, isAsync?: boolean, supportCORs?: boolean): Promise<any>;
+}
+```
 How the Canary script will be loaded according to configuration.
 
 #### `randomFactory`
+```typescript
+() => number
+```
 How to generate a random number.
 
 #### `defaultScriptFactory`
+```typescript
+() => string|undefined
+```
 How to get the default script url (when `canaryScriptUrl` is not provided).
 
 #### `globalCanaryIndication`
+```typescript
+export interface IGlobalCanaryIndication {
+    get: () => boolean,
+    set: (val: boolean) => void
+}
+```
 How to get and set the global indication of loading Canary.
