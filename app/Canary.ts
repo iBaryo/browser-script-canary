@@ -1,4 +1,4 @@
-import {CookieProvider} from "./CookieProvider";
+import {CookieProvider, ICookieProvider} from "./CookieProvider";
 import {IScriptLoader, ScriptLoader} from "./ScriptLoader";
 
 export interface ICanaryConfig {
@@ -14,17 +14,22 @@ export interface ICanaryConfig {
     globalCanaryIndicationName?: string
 }
 
+export interface IGlobalCanaryIndication {
+    get: () => boolean,
+    set: (val: boolean) => void
+}
+
 export class Canary {
 
     constructor(private _config: ICanaryConfig,
-                private _cookieProvider = new CookieProvider(),
+                private _cookieProvider : ICookieProvider = new CookieProvider(),
                 private _scriptLoader : IScriptLoader = new ScriptLoader(),
                 private _randomFactory = () => Math.random() * 100,
                 private _defaultScriptFactory = () =>
                     (!document || !document.currentScript)
                         ? undefined
                         : (document.currentScript as HTMLScriptElement).src,
-                private _globalCanaryIndication = {
+                private _globalCanaryIndication : IGlobalCanaryIndication = {
                     get: () => window[_config.globalCanaryIndicationName],
                     set: (val) => window[_config.globalCanaryIndicationName] = val
                 }) {

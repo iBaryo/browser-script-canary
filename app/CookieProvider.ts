@@ -1,11 +1,17 @@
-export class CookieProvider {
+export interface ICookieProvider {
+    get: (key: string) => string | null;
+    put: (key: string, val: string) => void;
+    remove: (key: string) => void;
+}
+
+export class CookieProvider implements ICookieProvider {
     public get(key: string): string | null {
         // http://stackoverflow.com/questions/11920697/how-to-get-hash-value-in-a-url-in-js
         const matches = document.cookie.match(new RegExp(key + '=([^$;]*)'));
         return matches ? matches[1] : null;
     }
 
-    public put(key : string, val : string) {
+    public put(key: string, val: string) {
         document.cookie = `${key}=${val};path=/;domain=.${location.hostname}`;
     }
 
